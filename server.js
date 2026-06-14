@@ -12,9 +12,10 @@ try {
 
 loadEnvFile(path.join(__dirname, ".env"));
 
-const PORT = Number(process.env.PORT || 5175);
-const HOST = process.env.HOST || process.env.BIND_HOST || "127.0.0.1";
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
+const PORT = Number(process.env.PORT || 5175);
+const RAW_HOST = process.env.HOST || process.env.BIND_HOST || "0.0.0.0";
+const HOST = IS_PRODUCTION && ["127.0.0.1", "localhost"].includes(RAW_HOST) ? "0.0.0.0" : RAW_HOST;
 const TRUST_PROXY = process.env.TRUST_PROXY === "true";
 const SECURE_COOKIES = process.env.SECURE_COOKIES === "true";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
@@ -1689,7 +1690,7 @@ const server = http.createServer(async (req, res) => {
 
   let url;
   try {
-    url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+    url = new URL(req.url, `http://${req.headers.host || `${HOST}:${PORT}`}`);
   } catch {
     sendError(res, 400, "Bad request.");
     return;
@@ -1708,6 +1709,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`Disha HealthQ backend running at http://${HOST}:${PORT}/`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Listening on ${HOST}:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
 });
