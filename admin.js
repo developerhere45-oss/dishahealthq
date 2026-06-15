@@ -1,4 +1,7 @@
 const seedDoctors = [];
+const PUBLIC_WEBSITE_HOSTS = new Set(["dishahealthq.in", "www.dishahealthq.in"]);
+const IS_PUBLIC_WEBSITE_ADMIN = PUBLIC_WEBSITE_HOSTS.has(window.location.hostname);
+const API_BASE = "";
 
 const state = {
   doctors: [],
@@ -23,7 +26,21 @@ const resultCount = document.querySelector("#resultCount");
 const toast = document.querySelector("#toast");
 const adminUserButton = document.querySelector(".admin-user");
 
+function apiUrl(path) {
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${API_BASE}${path}`;
+}
+
+function apiCredentials() {
+  return API_BASE ? "include" : "same-origin";
+}
+
 function init() {
+  if (IS_PUBLIC_WEBSITE_ADMIN) {
+    blockPublicAdminHost();
+    return;
+  }
+
   bindEvents();
   checkSession();
 
@@ -34,9 +51,27 @@ function init() {
   }
 }
 
+function blockPublicAdminHost() {
+  if (appEl) appEl.hidden = true;
+  if (loginSection) loginSection.hidden = false;
+  if (adminUserButton) {
+    adminUserButton.disabled = true;
+    adminUserButton.innerHTML = `<i data-lucide="shield-check"></i> Render Admin Only`;
+  }
+  if (loginForm) {
+    loginForm.innerHTML = `
+      <span class="eyebrow">Admin access disabled here</span>
+      <h1>Admin moved to backend</h1>
+      <p>This public website copy does not connect to admin APIs. Keep admin files only on the Render backend deployment.</p>
+      <small id="adminLoginMessage" role="status" aria-live="polite">Delete admin.html, admin.css and admin.js from Hostinger public_html.</small>
+    `;
+  }
+  refreshIcons();
+}
+
 async function checkSession() {
   try {
-    const response = await fetch("/api/admin/session", { credentials: "same-origin" });
+    const response = await fetch(apiUrl("/api/admin/session"), { credentials: apiCredentials() });
     const payload = await response.json();
     if (payload.authenticated) {
       state.authenticated = true;
@@ -86,11 +121,11 @@ async function apiFetch(url, options = {}) {
   if (!["GET", "HEAD"].includes(method) && state.csrfToken) {
     headers.set("X-CSRF-Token", state.csrfToken);
   }
-  const response = await fetch(url, {
+  const response = await fetch(apiUrl(url), {
     ...options,
     method,
     headers,
-    credentials: "same-origin"
+    credentials: apiCredentials()
   });
   if (response.status === 401) {
     showLogin("Session expired. Login again.");
@@ -127,7 +162,7 @@ function applySnapshot(payload) {
 function connectLiveEvents() {
   if (!window.EventSource) return;
   if (adminEvents) adminEvents.close();
-  adminEvents = new EventSource("/api/admin/events");
+  adminEvents = new EventSource(apiUrl("/api/admin/events"), { withCredentials: Boolean(API_BASE) });
   adminEvents.addEventListener("connected", (event) => {
     applySnapshot(JSON.parse(event.data));
   });
@@ -191,10 +226,10 @@ async function loginAdmin(event) {
   if (submitButton) submitButton.disabled = true;
 
   try {
-    const response = await fetch("/api/admin/session", {
+    const response = await fetch(apiUrl("/api/admin/session"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
+      credentials: apiCredentials(),
       body: JSON.stringify({
         username: document.querySelector("#adminUsername").value.trim(),
         password: document.querySelector("#adminPassword").value

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Disha HealthQ Admin</title>
+  <link rel="stylesheet" href="admin.css?v=13" />
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script defer src="admin.js?v=8"></script>
+</head>
+<body>
+  <header class="admin-header">
+    <a class="brand" href="index.html" aria-label="Back to Disha HealthQ home">
+      <img class="brand-logo" src="assets/disha-healthq-logo-new.png?v=2" alt="Disha HealthQ" />
+    </a>
+
+    <nav class="admin-nav" aria-label="Admin navigation">
+      <a href="index.html">Website</a>
+      <a href="#applications">Doctor Applications</a>
+      <a href="#audit">Audit</a>
+    </nav>
+
+    <button class="admin-user" type="button">
+      <i data-lucide="shield-check"></i>
+      Admin Panel
+    </button>
+  </header>
+
+  <section class="admin-login" id="adminLogin" hidden>
+    <form class="admin-login-card" id="adminLoginForm" autocomplete="on">
+      <span class="eyebrow">Secure admin access</span>
+      <h1>Admin Login</h1>
+      <p>Login is required before doctor approvals, rejections, audit logs and live admin data can be accessed.</p>
+      <label>
+        <span>Username</span>
+        <input id="adminUsername" name="username" type="text" autocomplete="username" required />
+      </label>
+      <label>
+        <span>Password</span>
+        <input id="adminPassword" name="password" type="password" autocomplete="current-password" required />
+      </label>
+      <button class="black-button" type="submit">
+        <i data-lucide="log-in"></i>
+        Login Securely
+      </button>
+      <small id="adminLoginMessage" role="status" aria-live="polite"></small>
+    </form>
+  </section>
+
+  <main id="adminApp" hidden>
+    <section class="admin-hero">
+      <div>
+        <span class="eyebrow">Doctor onboarding</span>
+        <h1>Approve doctors for website</h1>
+        <p>Review doctor applications and approve only the profiles that should appear live for patients. Rejected and pending doctors stay hidden.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="black-button" type="button" id="approveAllBtn">
+          <i data-lucide="badge-check"></i>
+          Approve Pending
+        </button>
+        <button class="ghost-button" type="button" id="resetBtn">
+          <i data-lucide="rotate-ccw"></i>
+          Reset Backend
+        </button>
+      </div>
+    </section>
+
+    <section class="metric-grid" aria-label="Doctor approval metrics">
+      <article>
+        <span class="metric-icon purple"><i data-lucide="clock-3"></i></span>
+        <div>
+          <strong id="pendingCount">0</strong>
+          <small>Pending review</small>
+        </div>
+      </article>
+      <article>
+        <span class="metric-icon green"><i data-lucide="check-circle-2"></i></span>
+        <div>
+          <strong id="approvedCount">0</strong>
+          <small>Approved</small>
+        </div>
+      </article>
+      <article>
+        <span class="metric-icon blue"><i data-lucide="globe-2"></i></span>
+        <div>
+          <strong id="liveCount">0</strong>
+          <small>Live on website</small>
+        </div>
+      </article>
+      <article>
+        <span class="metric-icon orange"><i data-lucide="x-circle"></i></span>
+        <div>
+          <strong id="rejectedCount">0</strong>
+          <small>Rejected</small>
+        </div>
+      </article>
+    </section>
+
+    <section class="admin-shell" id="applications">
+      <aside class="filters-panel">
+        <h2>Filters</h2>
+        <label>
+          <span>Search</span>
+          <div class="input-shell">
+            <i data-lucide="search"></i>
+            <input id="searchInput" type="search" placeholder="Name, specialty, city" />
+          </div>
+        </label>
+        <label>
+          <span>Status</span>
+          <select id="statusFilter">
+            <option value="all">All doctors</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </label>
+        <label>
+          <span>Specialty</span>
+          <select id="specialtyFilter">
+            <option value="all">All specialties</option>
+          </select>
+        </label>
+      </aside>
+
+      <section class="doctor-admin-list">
+        <div class="list-toolbar">
+          <div>
+            <span class="eyebrow">Applications</span>
+            <h2>Doctors awaiting action</h2>
+          </div>
+          <strong id="resultCount">0 results</strong>
+        </div>
+        <div id="adminDoctorList" class="admin-doctor-list" aria-live="polite"></div>
+      </section>
+    </section>
+
+    <section class="audit-panel" id="audit">
+      <div>
+        <span class="eyebrow">Audit log</span>
+        <h2>Recent admin actions</h2>
+      </div>
+      <div id="auditLog" class="audit-list"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
